@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
+using System.Xml.Serialization;
 
 namespace SerializationPractice
 {
@@ -13,7 +15,25 @@ namespace SerializationPractice
             try
             {
                 var JSONFilePath = Reader.GetJSONFilePath(folderPath);
-                Console.WriteLine(JSONFilePath);
+                using (var file = new StreamReader(JSONFilePath))
+                {
+                    var text = file.ReadToEnd();
+                    var squad = JsonSerializer.Deserialize<Squad>(text);
+
+                    var XMLFilePath = folderPath + @"\Squad.xml";
+
+                    if (File.Exists(XMLFilePath))
+                    {
+                        File.Delete(XMLFilePath);
+                        Console.WriteLine("Файл Squad.xml будет перезаписан.");
+                    }
+
+                    using (var xmlFile = new FileStream(folderPath + @"\Squad.xml", FileMode.CreateNew))
+                    {
+                        new XmlSerializer(typeof(Squad)).Serialize(xmlFile, squad);
+                        Console.WriteLine("Файл Squad.xml записан.");
+                    }
+                }
             }
             catch (Exception e)
             {
